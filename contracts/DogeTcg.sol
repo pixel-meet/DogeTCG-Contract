@@ -45,6 +45,7 @@ contract DogeTCG is ERC404 {
 
     uint256 public maxLife = 100;
 
+    string public bosterImg = "bafybeic5zmxvk6mmacsivnt2mm3ps5ahfylunekbe7m76wh3dcdjg5pvra";
     string public providerSource = "https://ipfs.io/ipfs/";
     mapping(uint256 => uint256) public revealedCards;
 
@@ -54,9 +55,6 @@ contract DogeTCG is ERC404 {
         address _owner
     ) ERC404("dogt", "DogeTCG", 18, 20000, _owner) {
         balanceOf[_owner] = 20000 * 10 ** 18;
-
-        addImgSource("QmZ3");
-        addImgSource("Qmtrert");
     }
 
     function bulkRevealCards(uint256[] memory tokenIds) public {
@@ -126,7 +124,7 @@ contract DogeTCG is ERC404 {
             string memory output = string(abi.encodePacked(
                 '{"name": "',
                 card.name,
-                '", "description": "DogeTCG is a TCG game where you can collect and battle with your cards. You can reveal your cards to see their stats and use them in battles.", "image": "',
+                '", "description": "DogeTCG is a TCG game where you can collect and battle with your cards.", "image": "',
                 providerSource,
                 card.img,
                 '", "attributes": [',
@@ -147,7 +145,12 @@ contract DogeTCG is ERC404 {
             ));
             return output;
         } else {
-            return "https://raw.githubusercontent.com/devlordmonarch/metadata/main/unrevealed.json";
+            return string(abi.encodePacked(
+                '{"name": "Hidden Card", "description": "DogeTCG is a TCG game where you can collect and battle with your cards. This card is hidden. Reveal it to see its stats.", "image": "',
+                providerSource,
+                bosterImg,
+                '"}'
+            ));
         }
     }
 }
