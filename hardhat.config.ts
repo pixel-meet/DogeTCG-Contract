@@ -50,12 +50,15 @@ const config: HardhatUserConfig = {
     ropsten: createTestnetConfig("ropsten"),
   },
   solidity: {
-    compilers: [
-      {
-        version: "0.8.17",
-      },
-    ],
-  },
+    version: "0.8.20",
+    settings: {
+        // optimizer: {
+        //     enabled: true,
+        //     runs: 200 // Adjust based on your contract's needs
+        // },
+        // viaIR: true
+    }
+},
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },

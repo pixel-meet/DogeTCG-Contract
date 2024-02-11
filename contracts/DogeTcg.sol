@@ -1,60 +1,45 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "./ERC404.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import "./lib/GeneralUtils.sol";
+import "./lib/CardManagementLib.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-/**
- * Keep it simple - TCG Game based on ERC404
- * The better the types match the better the card and power is of the card. E.g =  cid + lastname + breedtype + attack1 = x4 Power
- * Rare matches are x5 Power 
- */ 
-contract DogeTCG is ERC404 {
+contract DogeTCG is Ownable, ERC404 {
 
-    struct CardType {
-        string name;
-        string attack1;
-        string attack2;
-        string attack3;
-        uint256 life;
-        string img;//ipfs CID
-    }
-    mapping(uint256 => CardType) public cardTypes;
-    uint256 public cardTypeLength = 0;
+    using CardManagementLib for CardManagementLib.CardData;
 
-    mapping(uint256 => string) public imgSources;
-    uint256 public imgSourcesLength = 0;
+    CardManagementLib.CardData private cardData;
 
-    // 20 different first names
-    string[] public firstNames = ["Ren", "Jiro", "Yuna", "Kai", "Mila", "Finn", "Zane", "Lex", "Taro", "Niko", "Sora", "Elle", "Riku", "Lutz", "Glen", "Hiro", "Lina", "Otto", "Yuki", "Emi"];
-    // 20 different fantasy last names based on breed Types mixed names like WaterBender or BolderBro or else
-    string[] public lastNames = ["FireSenshi", "WaterShogun", "GrassRonin", "EarthSamurai", "PsyNinja", "NormalKenshi", "FireKami", "WaterOni", "GrassShinobi", "EarthKaiju", "PsySage", "NormalMiko", "FireYokai", "WaterDragon", "GrassMonk", "EarthGolem", "PsyOracle", "NormalGuardian", "FirePhoenix", "WaterKappa"];
-    // 6 types
-    string[] public breedTypes = ["Fire", "Water", "Grass", "Earth", "Psy", "Normal"];
-      // 2 attack for each type
-    string[] public attacks = ["Fire Ball", "Fire Punch", "Water Gun", "Water Splash", "Grass Whip", "Grass Punch", "Mud Splash", "Earth Punch", "Psy Shock", "Psy Punch", "Tackle", "Scratch"];
-    // 1 special attack for each type
-    string[] public specialAttacks = ["Fire Blast", "Hydro Pump", "Solar Beam", "Earthquake", "Psy Beam", "Hyper Beam"];
+    string[] private imgSources;
+    string[] private firstNames = ["Ren", "Jiro", "Yuna", "Kai", "Mila", "Finn", "Zane", "Lex", "Taro", "Niko", "Sora", "Elle", "Riku", "Lutz", "Glen", "Hiro", "Lina", "Otto", "Yuki", "Emi"];
+    string[] private lastNames = ["FireSenshi", "WaterShogun", "GrassRonin", "EarthSamurai", "PsyNinja", "NormalKenshi", "FireKami", "WaterOni", "GrassShinobi", "EarthKaiju", "PsySage", "NormalMiko", "FireYokai", "WaterDragon", "GrassMonk", "EarthGolem", "PsyOracle", "NormalGuardian", "FirePhoenix", "WaterKappa"];
+    string[] private breedTypes = ["Fire", "Water", "Grass", "Earth", "Psy", "Normal"];
+    string[] private attacks = ["Fire Ball", "Fire Punch", "Water Gun", "Water Splash", "Grass Whip", "Grass Punch", "Mud Splash", "Earth Punch", "Psy Shock", "Psy Punch", "Tackle", "Scratch"];
+    string[] private specialAttacks = ["Fire Blast", "Hydro Pump", "Solar Beam", "Earthquake", "Psy Beam", "Hyper Beam"];
+    string[] private rareBreeds = ["Angel", "God", "Demon", "Devil"];
+    string[] private rareAttacks = ["Celestial Strike", "Divine Judgment", "Abyssal Fire", "Unholy Fury", "Solar Flare", "Tsunami Wave", "Nature's Wrath", "Seismic Quake", "Mind Crush", "Void Slash"];
+    string[] private rareSpecialAttacks = ["Heaven's Grace", "Omnipotent Blast", "Infernal Chains", "Darkness Overwhelm", "Phoenix Rebirth", "Leviathan's Rage", "Gaia's Embrace", "Titan's Stomp", "Psychic Storm", "Ethereal Strike"];
 
-    // For Rarity purposes to make it more interesting
-    string[] public rareBreeds = ["Angel", "God", "Demon", "Devil"];
-    // 10 rare attacks 1 for each rare breed and rest based on breed types
-    string[] public rareAttacks = ["Celestial Strike", "Divine Judgment", "Abyssal Fire", "Unholy Fury", "Solar Flare", "Tsunami Wave", "Nature's Wrath", "Seismic Quake", "Mind Crush", "Void Slash"];
-    // 10 rare speical attack  1 for each rare breed and rest based on breed types
-     string[] public rareSpecialAttacks = ["Heaven's Grace", "Omnipotent Blast", "Infernal Chains", "Darkness Overwhelm", "Phoenix Rebirth", "Leviathan's Rage", "Gaia's Embrace", "Titan's Stomp", "Psychic Storm", "Ethereal Strike"];
+    uint256 private maxLife = 100;
 
-    uint256 public maxLife = 100;
-
-    string public bosterImg = "bafybeic5zmxvk6mmacsivnt2mm3ps5ahfylunekbe7m76wh3dcdjg5pvra";
-    string public providerSource = "https://ipfs.io/ipfs/";
+    string private bosterImg = "bafybeic5zmxvk6mmacsivnt2mm3ps5ahfylunekbe7m76wh3dcdjg5pvra";
+    string private providerSource = "https://ipfs.io/ipfs/";
     mapping(uint256 => uint256) public revealedCards;
 
     event CardRevealed(uint256 indexed tokenId, uint256 indexed cardTypeId, address indexed owner);
 
     constructor(
         address _owner
-    ) ERC404("dogt", "DogeTCG", 18, 20000, _owner) {
-        balanceOf[_owner] = 20000 * 10 ** 18;
+    ) ERC404("DogeTCG","DOGT", 18) Ownable(_owner) {
+        _setWhitelist(_owner, true);
+        _mintERC20(_owner, 50000 * units, false);
+    }
+
+    function setWhitelist(address account_, bool value_) external onlyOwner {
+        _setWhitelist(account_, value_);
     }
 
     function bulkRevealCards(uint256[] memory tokenIds) public {
@@ -64,8 +49,7 @@ contract DogeTCG is ERC404 {
     }
 
     function revealCard(uint256 tokenId) public {
-        require(balanceOf[msg.sender] > 0, "You don't have any cards");
-        require(_ownerOf[tokenId] == msg.sender, "You must own the token to reveal it");
+        require(_getOwnerOf(tokenId) == msg.sender, "You must own the token to reveal it");
         require(revealedCards[tokenId] == 0, "Card is already revealed");
 
         uint256 cardTypeId = _createCardType();
@@ -74,68 +58,55 @@ contract DogeTCG is ERC404 {
         emit CardRevealed(tokenId, cardTypeId, msg.sender);
     }
 
-    function _random(string memory input) internal view returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(input, block.timestamp, block.difficulty, msg.sender)));
-    }
-
     function _createCardType() internal returns (uint256){
-        cardTypeLength++;
-        uint256 id = cardTypeLength;
-        uint256 rand = _random(Strings.toString(id));
+        uint256 rand = GeneralUrilLib.random(Strings.toString(cardData.cardTypeLength + 1), msg.sender);
+        CardManagementLib.CreateCardTypeParams memory params = CardManagementLib.CreateCardTypeParams({
+            firstNames: firstNames,
+            lastNames: lastNames,
+            breedTypes: breedTypes,
+            attacks: attacks,
+            specialAttacks: specialAttacks,
+            rareBreeds: rareBreeds,
+            rareAttacks: rareAttacks,
+            rareSpecialAttacks: rareSpecialAttacks,
+            imgSources: imgSources,
+            maxLife: maxLife,
+            rand: rand
+        });
 
-        bool isRareBreed = (rand % 100) < 5; // 5% chance for rare breed
-        bool isRareAttack = (rand % 100) < 10; // 10% chance for rare attack
-        bool isRareSpecialAttack = (rand % 100) < 15; // 15% chance for rare special attack
-
-        string memory breed = isRareBreed ? rareBreeds[rand % rareBreeds.length] : breedTypes[rand % breedTypes.length];
-        string memory attack1 = isRareAttack ? rareAttacks[rand % rareAttacks.length] : attacks[rand % attacks.length];
-        string memory attack2 = attacks[(rand + 1) % attacks.length];
-        string memory attack3 = isRareSpecialAttack ? rareSpecialAttacks[rand % rareSpecialAttacks.length] : specialAttacks[rand % specialAttacks.length];
-
-        uint256 life = (rand % maxLife) + 1;
-        string memory img = imgSources[rand % imgSourcesLength];
-        cardTypes[id] = CardType(breed, attack1, attack2, attack3, life, img);
-
-        return id;
+        uint256 cardTypeId = CardManagementLib.createCardType(cardData, params);
+        return cardTypeId;
     }
-
 
     function changeIpfsProvider(string memory _ipfsProviderSource) public payable onlyOwner {
         providerSource = _ipfsProviderSource;
     }
 
     function addImgSource(string memory _source) public payable onlyOwner {
-        imgSources[imgSourcesLength] = _source;
-        imgSourcesLength++;
-    }
-
-    function setNameSymbol(
-        string memory _name,
-        string memory _symbol
-    ) public onlyOwner {
-        _setNameSymbol(_name, _symbol);
+        imgSources.push(_source);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        require(_ownerOf[tokenId] != address(0), "Token does not exist");
-
         if (revealedCards[tokenId] > 0) {
-            CardType memory card = cardTypes[revealedCards[tokenId]];
+            CardManagementLib.CardType memory card = cardData.cardTypes[revealedCards[tokenId]];
             string memory output = string(abi.encodePacked(
                 '{"name": "',
                 card.name,
-                '", "description": "DogeTCG is a TCG game where you can collect and battle with your cards.", "image": "',
+                '", "description": "DogeTCG.", "image": "',
                 providerSource,
                 card.img,
                 '", "attributes": [',
+                '{"trait_type": "Breed", "value": "',
+                card.breed,
+                '"},',
                 '{"trait_type": "Attack 1", "value": "',
-                card.attack1,
+                card.attacks[0],
                 '"},',
                 '{"trait_type": "Attack 2", "value": "',
-                card.attack2,
+                card.attacks[1],
                 '"},',
-                '{"trait_type": "Attack 3", "value": "',
-                card.attack3,
+                '{"trait_type": "Special Attack", "value": "',
+                card.attacks[2],
                 '"},',
                 '{"trait_type": "Life", "value": ',
                 Strings.toString(card.life),
@@ -146,7 +117,7 @@ contract DogeTCG is ERC404 {
             return output;
         } else {
             return string(abi.encodePacked(
-                '{"name": "Hidden Card", "description": "DogeTCG is a TCG game where you can collect and battle with your cards. This card is hidden. Reveal it to see its stats.", "image": "',
+                '{"name": "Hidden Card", "description": "DogeTCG. Reveal it to see its stats.", "image": "',
                 providerSource,
                 bosterImg,
                 '"}'
