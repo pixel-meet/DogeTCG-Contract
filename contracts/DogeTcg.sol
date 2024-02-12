@@ -2,11 +2,11 @@
 pragma solidity ^0.8.20;
 
 import "./ERC404.sol";
-import "./lib/GeneralUtils.sol";
 import "./lib/CardManagementLib.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
+// Gen 1 of DogeTCG
 contract DogeTCG is Ownable, ERC404 {
 
     using CardManagementLib for CardManagementLib.CardData;
@@ -14,14 +14,14 @@ contract DogeTCG is Ownable, ERC404 {
     CardManagementLib.CardData private cardData;
 
     string[] private imgSources;
+    string[] private rareImageSources;
     string[] private firstNames = ["Ren", "Jiro", "Yuna", "Kai", "Mila", "Finn", "Zane", "Lex", "Taro", "Niko", "Sora", "Elle", "Riku", "Lutz", "Glen", "Hiro", "Lina", "Otto", "Yuki", "Emi"];
-    string[] private lastNames = ["FireSenshi", "WaterShogun", "GrassRonin", "EarthSamurai", "PsyNinja", "NormalKenshi", "FireKami", "WaterOni", "GrassShinobi", "EarthKaiju", "PsySage", "NormalMiko", "FireYokai", "WaterDragon", "GrassMonk", "EarthGolem", "PsyOracle", "NormalGuardian", "FirePhoenix", "WaterKappa"];
-    string[] private breedTypes = ["Fire", "Water", "Grass", "Earth", "Psy", "Normal"];
-    string[] private attacks = ["Fire Ball", "Fire Punch", "Water Gun", "Water Splash", "Grass Whip", "Grass Punch", "Mud Splash", "Earth Punch", "Psy Shock", "Psy Punch", "Tackle", "Scratch"];
+    string[] private breedTypes = ["FireSenshi", "WaterShogun", "GrassRonin", "EarthSamurai", "PsyNinja", "PlainSamurai", "FireKami", "WaterOni", "GrassShinobi", "EarthKaiju", "PsySage", "PlainMaiden"];
+    string[] private attacks = ["Fire Ball", "Fire Punch", "Water Gun", "Water Splash", "Grass Whip", "Grass Punch", "Mud Splash", "Earth Punch", "Psy Shock", "Psy Punch", "Headbutt", "Scratch"];
     string[] private specialAttacks = ["Fire Blast", "Hydro Pump", "Solar Beam", "Earthquake", "Psy Beam", "Hyper Beam"];
-    string[] private rareBreeds = ["Angel", "God", "Demon", "Devil"];
-    string[] private rareAttacks = ["Celestial Strike", "Divine Judgment", "Abyssal Fire", "Unholy Fury", "Solar Flare", "Tsunami Wave", "Nature's Wrath", "Seismic Quake", "Mind Crush", "Void Slash"];
-    string[] private rareSpecialAttacks = ["Heaven's Grace", "Omnipotent Blast", "Infernal Chains", "Darkness Overwhelm", "Phoenix Rebirth", "Leviathan's Rage", "Gaia's Embrace", "Titan's Stomp", "Psychic Storm", "Ethereal Strike"];
+    string[] private rareBreeds = ["CelestialAegis", "EternalGod", "VoidWalker", "InfernalOverlord"];
+    string[] private rareAttacks = ["Celestial Strike", "Divine Judgment", "Abyssal Fire", "Solar Flare", "Tsunami Wave", "Seismic Quake", "Mind Crush", "Void Slash"];
+    string[] private rareSpecialAttacks = ["Heaven's Grace", "Darkness Overwhelm", "Phoenix Rebirth", "Leviathan's Rage", "Gaia's Embrace", "Titan's Stomp", "Psychic Storm", "Ethereal Strike"];
 
     uint256 private maxLife = 100;
 
@@ -57,10 +57,8 @@ contract DogeTCG is Ownable, ERC404 {
     }
 
     function _createCardType() internal returns (uint256){
-        uint256 rand = GeneralUrilLib.random(Strings.toString(cardData.cardTypeLength + 1), msg.sender);
         CardManagementLib.CreateCardTypeParams memory params = CardManagementLib.CreateCardTypeParams({
             firstNames: firstNames,
-            lastNames: lastNames,
             breedTypes: breedTypes,
             attacks: attacks,
             specialAttacks: specialAttacks,
@@ -68,8 +66,8 @@ contract DogeTCG is Ownable, ERC404 {
             rareAttacks: rareAttacks,
             rareSpecialAttacks: rareSpecialAttacks,
             imgSources: imgSources,
-            maxLife: maxLife,
-            rand: rand
+            rareImageSources: rareImageSources,
+            maxLife: maxLife
         });
 
         uint256 cardTypeId = CardManagementLib.createCardType(cardData, params);
@@ -84,6 +82,10 @@ contract DogeTCG is Ownable, ERC404 {
         imgSources.push(_source);
     }
 
+    function addRareImgSource(string memory _source) public onlyOwner {
+        rareImageSources.push(_source);
+    }
+
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         if (revealedCards[tokenId] > 0) {
             CardManagementLib.CardType memory card = cardData.cardTypes[revealedCards[tokenId]];
@@ -94,7 +96,7 @@ contract DogeTCG is Ownable, ERC404 {
                 providerSource,
                 card.img,
                 '", "attributes": [',
-                '{"trait_type": "Breed", "value": "',
+                '{"trait_type": "Family", "value": "',
                 card.breed,
                 '"},',
                 '{"trait_type": "Attack 1", "value": "',

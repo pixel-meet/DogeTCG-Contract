@@ -43,6 +43,7 @@ describe("DogeTCG", function () {
       const { dogeTCG, owner, addr1 } = await loadFixture(deployDogeTCGFixture);
       const transferAmount = ethers.utils.parseUnits(amount.toString(), 18);
       dogeTCG.connect(owner).addImgSource('test.png');
+      dogeTCG.connect(owner).addRareImgSource('testRARE.png');
       await dogeTCG.connect(owner).transfer(await addr1.getAddress(), transferAmount);
       const erc721Total1 = await dogeTCG.erc721TotalSupply();
       console.log("--",erc721Total1);
