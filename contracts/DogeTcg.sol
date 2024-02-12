@@ -31,15 +31,13 @@ contract DogeTCG is Ownable, ERC404 {
 
     event CardRevealed(uint256 indexed tokenId, uint256 indexed cardTypeId, address indexed owner);
 
-    constructor(
-        address _owner
-    ) ERC404("DogeTCG","DOGT", 18) Ownable(_owner) {
-        _setWhitelist(_owner, true);
-        _mintERC20(_owner, 50000 * units, false);
+    constructor() ERC404("DogeTCG","DOGT", 18) Ownable(msg.sender) {
+        _setERC721TransferExempt(msg.sender, true);
+        _mintERC20(msg.sender, 10000 * units, false);
     }
 
-    function setWhitelist(address account_, bool value_) external onlyOwner {
-        _setWhitelist(account_, value_);
+    function setERC721TransferExempt(address account_, bool value_) external onlyOwner {
+        _setERC721TransferExempt(account_, value_);
     }
 
     function bulkRevealCards(uint256[] memory tokenIds) public {
@@ -78,11 +76,11 @@ contract DogeTCG is Ownable, ERC404 {
         return cardTypeId;
     }
 
-    function changeIpfsProvider(string memory _ipfsProviderSource) public payable onlyOwner {
+    function changeIpfsProvider(string memory _ipfsProviderSource) public onlyOwner {
         providerSource = _ipfsProviderSource;
     }
 
-    function addImgSource(string memory _source) public payable onlyOwner {
+    function addImgSource(string memory _source) public onlyOwner {
         imgSources.push(_source);
     }
 

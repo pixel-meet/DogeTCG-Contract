@@ -8,8 +8,7 @@ describe("DogeTCG", function () {
     const [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
     const DogeTCG = await ethers.getContractFactory("DogeTCG");
-    const dogeTCG = await DogeTCG.deploy(await owner.getAddress());
-    await dogeTCG.setWhitelist(await owner.getAddress(), true);
+    const dogeTCG = await DogeTCG.deploy();
 
     return { dogeTCG, owner, addr1, addr2, addrs };
   }
@@ -45,11 +44,13 @@ describe("DogeTCG", function () {
       const transferAmount = ethers.utils.parseUnits(amount.toString(), 18);
       dogeTCG.connect(owner).addImgSource('test.png');
       await dogeTCG.connect(owner).transfer(await addr1.getAddress(), transferAmount);
-
+      const erc721Total1 = await dogeTCG.erc721TotalSupply();
+      console.log("--",erc721Total1);
       const tokenId = 1;
       await dogeTCG.connect(addr1).revealCard(tokenId);
       const tokeuri = await dogeTCG.tokenURI(tokenId);
-      console.log(tokeuri);
+      const erc721Total = await dogeTCG.erc721TotalSupply();
+      console.log(tokeuri, "--",erc721Total);
       expect(tokeuri).to.contain('DogeTCG');
       // expect(card.attack1).to.not.be.empty;
       // expect(card.attack2).to.not.be.empty;
