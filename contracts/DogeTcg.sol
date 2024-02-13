@@ -81,6 +81,12 @@ contract DogeTCG is Ownable, ERC404 {
         imgSources.push(_source);
     }
 
+    function addMultipleImgSource(string[] memory _sources) public onlyOwner {
+        for (uint256 i = 0; i < _sources.length; i++) {
+            imgSources.push(_sources[i]);
+        }
+    }
+
     function addRareImgSource(string memory _source) public onlyOwner {
         rareImageSources.push(_source);
     }
