@@ -15,10 +15,10 @@ contract DogeTCG is Ownable, ERC404 {
     string[] private imgSources;
     string[] private rareImageSources;
     string[] private firstNames = ["Ren", "Jiro", "Yuna", "Kai", "Mila", "Finn", "Zane", "Lex", "Taro", "Niko", "Sora", "Elle", "Riku", "Lutz", "Glen", "Hiro", "Lina", "Otto", "Yuki", "Emi"];
-    string[] private breedTypes = ["FireSenshi", "WaterShogun", "GrassRonin", "EarthSamurai", "PsyNinja", "PlainSamurai", "FireKami", "WaterOni", "GrassShinobi", "EarthKaiju", "PsySage", "PlainMaiden"];
+    string[] private breedTypes = ["Fireoge", "Wateroge", "Grassoge", "Earthoge", "Psyoge", "Plainoge"];
     string[] private attacks = ["Fire Ball", "Fire Punch", "Water Gun", "Water Splash", "Grass Whip", "Grass Punch", "Mud Splash", "Earth Punch", "Psy Shock", "Psy Punch", "Headbutt", "Scratch"];
     string[] private specialAttacks = ["Fire Blast", "Hydro Pump", "Solar Beam", "Earthquake", "Psy Beam", "Hyper Beam"];
-    string[] private rareBreeds = ["CelestialAegis", "EternalGod", "VoidWalker", "InfernalOverlord"];
+    string[] private rareBreeds = ["Angeloge", "Godoge", "VoidWalker", "Deviloge"];
     string[] private rareAttacks = ["Celestial Strike", "Divine Judgment", "Abyssal Fire", "Solar Flare", "Tsunami Wave", "Seismic Quake", "Mind Crush", "Void Slash"];
     string[] private rareSpecialAttacks = ["Heaven's Grace", "Darkness Overwhelm", "Phoenix Rebirth", "Leviathan's Rage", "Gaia's Embrace", "Titan's Stomp", "Psychic Storm", "Ethereal Strike"];
 
