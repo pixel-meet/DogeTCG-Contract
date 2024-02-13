@@ -6,7 +6,6 @@ import "./lib/CardManagementLib.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-// Gen 1 of DogeTCG
 contract DogeTCG is Ownable, ERC404 {
 
     using CardManagementLib for CardManagementLib.CardData;
@@ -92,7 +91,7 @@ contract DogeTCG is Ownable, ERC404 {
             string memory output = string(abi.encodePacked(
                 '{"name": "',
                 card.name,
-                '", "description": "DogeTCG.", "image": "',
+                '", "description": "DogeTCG - Generation #1", "image": "',
                 providerSource,
                 card.img,
                 '", "attributes": [',
@@ -117,7 +116,7 @@ contract DogeTCG is Ownable, ERC404 {
             return output;
         } else {
             return string(abi.encodePacked(
-                '{"name": "Hidden Card", "description": "DogeTCG. Reveal it to see its stats.", "image": "',
+                '{"name": "Hidden Card", "description": "DogeTCG - Generation #1. Reveal the booster to see its stats.", "image": "',
                 providerSource,
                 bosterImg,
                 '"}'
