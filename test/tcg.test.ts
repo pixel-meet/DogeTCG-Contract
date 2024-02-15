@@ -42,21 +42,20 @@ describe("DogeTCG", function () {
       const amount = 10;
       const { dogeTCG, owner, addr1 } = await loadFixture(deployDogeTCGFixture);
       const transferAmount = ethers.utils.parseUnits(amount.toString(), 18);
-      dogeTCG.connect(owner).addImgSource('test.png');
-      dogeTCG.connect(owner).addRareImgSource('testRARE.png');
+      const imgSourceBytes32 = ethers.utils.formatBytes32String('test.png');
+      const rareImgSourceBytes32 = ethers.utils.formatBytes32String('testRARE.png');
+
+      await dogeTCG.connect(owner).addImgSource(imgSourceBytes32);
+      await dogeTCG.connect(owner).addRareImgSource(rareImgSourceBytes32);
       await dogeTCG.connect(owner).transfer(await addr1.getAddress(), transferAmount);
       const erc721Total1 = await dogeTCG.erc721TotalSupply();
-      console.log("--",erc721Total1);
+      console.log("--", erc721Total1);
       const tokenId = 1;
       await dogeTCG.connect(addr1).revealCard(tokenId);
       const tokeuri = await dogeTCG.tokenURI(tokenId);
       const erc721Total = await dogeTCG.erc721TotalSupply();
-      console.log(tokeuri, "--",erc721Total);
+      console.log(tokeuri);
       expect(tokeuri).to.contain('DogeTCG');
-      // expect(card.attack1).to.not.be.empty;
-      // expect(card.attack2).to.not.be.empty;
-      // expect(card.attack3).to.not.be.empty;
-      // expect(card.name).to.not.be.empty;
     });
 
   });
