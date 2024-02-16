@@ -8,6 +8,7 @@ library CardManagementLib {
         bytes32[3] attacks;
         uint256 life;
         bytes img;
+        uint256 generation;
     }
 
     struct CreateCardTypeParams {
@@ -21,6 +22,7 @@ library CardManagementLib {
         bytes[] imgSources;
         bytes[] rareImageSources;
         uint256 maxLife;
+        uint256 generation;
     }
 
     struct CardData {
@@ -69,7 +71,8 @@ library CardManagementLib {
                 breed: breed,
                 attacks: selectAttacks(ctx.params, ctx.rarity),
                 life: generateRandom(ctx.id, ctx.params.maxLife) + 1,
-                img: selectImage(ctx.params, ctx.rarity)
+                img: selectImage(ctx.params, ctx.rarity),
+                generation: ctx.params.generation
             });
     }
 

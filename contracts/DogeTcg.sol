@@ -96,7 +96,8 @@ contract DogeTCG is Ownable, ERC404 {
             rareSpecialAttacks: rareSpecialAttacks,
             imgSources: imgSources,
             rareImageSources: rareImageSources,
-            maxLife: maxLife
+            maxLife: maxLife,
+            generation: generation
         });
 
         uint256 cardTypeId = CardManagementLib.createCardType(cardData, params);
@@ -125,7 +126,7 @@ contract DogeTCG is Ownable, ERC404 {
                 abi.encodePacked(
                     '{"name": "',
                     card.firstName, " " ,card.breed,
-                    '", "description": "DogeTCG - Generation #', Strings.toString(generation) ,'", "image": "',
+                    '", "description": "DogeTCG - Generation #', Strings.toString(card.generation) ,'", "image": "',
                     providerSource,
                     card.img,
                     '", "attributes": [',
