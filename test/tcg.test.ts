@@ -8,7 +8,7 @@ describe("DogeTCG", function () {
     const [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
 
     const DogeTCG = await ethers.getContractFactory("DogeTCG");
-    const dogeTCG = await DogeTCG.deploy();
+    const dogeTCG = await DogeTCG.deploy(addr1.address);
 
     return { dogeTCG, owner, addr1, addr2, addrs };
   }
@@ -45,8 +45,8 @@ describe("DogeTCG", function () {
       const imgSourceBytes32 = ethers.utils.formatBytes32String('test.png');
       const rareImgSourceBytes32 = ethers.utils.formatBytes32String('testRARE.png');
 
-      await dogeTCG.connect(owner).addImgSource(imgSourceBytes32);
-      await dogeTCG.connect(owner).addRareImgSource(rareImgSourceBytes32);
+      await dogeTCG.connect(owner).addImgSources([imgSourceBytes32]);
+      await dogeTCG.connect(owner).addRareImgSourcs([rareImgSourceBytes32]);
       await dogeTCG.connect(owner).transfer(await addr1.getAddress(), transferAmount);
       const erc721Total1 = await dogeTCG.erc721TotalSupply();
       console.log("--", erc721Total1);

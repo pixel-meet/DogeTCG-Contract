@@ -5,8 +5,9 @@ import "./ERC404.sol";
 import "./lib/CardManagementLib.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { ERC404UniswapV2Exempt } from "./ERC404UniswapV2Exempt.sol";
 
-contract DogeTCG is Ownable, ERC404 {
+contract DogeTCG is Ownable, ERC404, ERC404UniswapV2Exempt {
     using CardManagementLib for CardManagementLib.CardData;
 
     CardManagementLib.CardData private cardData;
@@ -24,15 +25,16 @@ contract DogeTCG is Ownable, ERC404 {
     uint256 private maxLife = 100;
 
     bytes32 private providerSource = bytes32("https://ipfs.io/ipfs/");
-    uint256 private lastGenerationIncreaseTime = 0;
-    uint256 private generationIncreaseInterval = 70 days;
-    uint256 private generation = 1;
+    uint16 private lastGenerationIncreaseTime = 0;
+    uint64 private generationIncreaseInterval = 70 days;
+    uint16 private generation = 1;
 
     mapping(uint256 => uint256) public revealedCards;
 
     event CardRevealed(uint256 indexed tokenId, uint256 indexed cardTypeId, address indexed owner);
-
-    constructor() ERC404("DogeTCG", "DOGT", 18) Ownable(msg.sender) {
+   
+    //0x7a250d5630b4cf539739df2c5dacb4c659f2488d Router address
+    constructor(address uniswapV2Router_) ERC404("DogeTCG", "DOGT", 18) Ownable(msg.sender) ERC404UniswapV2Exempt(uniswapV2Router_){
         firstNames = [bytes32("Ren"), bytes32("Jiro"), bytes32("Yuna"), bytes32("Kai"), bytes32("Mila"), bytes32("Finn"), bytes32("Zane"), bytes32("Lex"), bytes32("Taro"), bytes32("Niko"), bytes32("Sora"), bytes32("Elle"), bytes32("Riku"), bytes32("Lutz"), bytes32("Glen"), bytes32("Hiro"), bytes32("Lina"), bytes32("Otto"), bytes32("Yuki"), bytes32("Emi")];
         breedTypes = [bytes32("Fireoge"), bytes32("Wateroge"), bytes32("Grassoge"), bytes32("Earthoge"), bytes32("Psyoge"), bytes32("Plainoge")];
         attacks = [bytes32("Fire Ball"), bytes32("Fire Punch"), bytes32("Water Gun"), bytes32("Water Splash"), bytes32("Grass Whip"), bytes32("Grass Punch"), bytes32("Mud Splash"), bytes32("Earth Punch"), bytes32("Psy Shock"), bytes32("Psy Punch"), bytes32("Headbutt"), bytes32("Scratch")];
@@ -42,27 +44,7 @@ contract DogeTCG is Ownable, ERC404 {
         rareSpecialAttacks = [bytes32("Heaven's Grace"), bytes32("Darkness Overwhelm"), bytes32("Phoenix Rebirth"), bytes32("Leviathan's Rage"), bytes32("Gaia's Embrace"), bytes32("Titan's Stomp"), bytes32("Psychic Storm"), bytes32("Ethereal Strike")];
 
         _setERC721TransferExempt(msg.sender, true);
-        _mintERC20(msg.sender, 10000 * units, false);
-    }
-
-    function increaseGeneration(
-        bytes32[] memory _newFirstNames,
-        bytes32[] memory _newAttacks,
-        bytes32[] memory _newSpecialAttacks,
-        bytes32[] memory _newRareBreeds,
-        bytes32[] memory _newRareAttacks,
-        bytes32[] memory _newRareSpecialAttacks
-    ) external onlyOwner {
-        require(block.timestamp >= lastGenerationIncreaseTime + generationIncreaseInterval, "Cannot increase generation yet.");
-        lastGenerationIncreaseTime = block.timestamp;
-        generation++;
-
-        firstNames = _newFirstNames;
-        attacks = _newAttacks;
-        specialAttacks = _newSpecialAttacks;
-        rareBreeds = _newRareBreeds;
-        rareAttacks = _newRareAttacks;
-        rareSpecialAttacks = _newRareSpecialAttacks;
+        _mintERC20(msg.sender, 10000 * units);
     }
 
     function setERC721TransferExempt(address account_, bool value_) external onlyOwner {
